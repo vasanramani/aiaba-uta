@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Notebook Export — assignment.ipynb</title>
+  <style>
+    body{font-family:Segoe UI,Roboto,Arial,Helvetica,sans-serif;background:#f6f8fa;color:#111;margin:0;padding:20px}
+    .container{max-width:1100px;margin:0 auto}
+    h1{font-size:20px;margin-bottom:8px}
+    .cell{background:#fff;border:1px solid #e1e4e8;border-radius:6px;padding:12px;margin:12px 0}
+    .cell .meta{font-size:12px;color:#586069;margin-bottom:8px}
+    pre{background:#f3f4f6;border-radius:4px;padding:10px;overflow:auto}
+    .markdown{white-space:pre-wrap}
+    .code pre{margin:0}
+    .toolbar{font-size:13px;color:#6a737d;margin-bottom:12px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Export of assignment.ipynb</h1>
+    <div class="toolbar">This is a static export: markdown cells shown as raw markdown, code cells shown as code.</div>
+
+    <!-- Cell 1: markdown -->
+    <div class="cell">
+      <div class="meta">Markdown cell</div>
+      <div class="markdown"><pre>&lt;a href="https://colab.research.google.com/github/vasanramani/Great-Learning/blob/main/AppleHBR/assignment.ipynb" target="_parent"&gt;&lt;img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/&gt;&lt;/a&gt;</pre></div>
+    </div>
+
+    <!-- Cell 2: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Install required libraries
+!pip install -q langchain_community \
+              langchain \
+              langchain_openai \
+              langchain-chroma \
+              pymupdf==1.26.3 \
+              tiktoken==0.9.0 \
+              datasets==4.0.0 \
+              evaluate==0.4.5</pre>
+    </div>
+
+    <!-- Cell 3: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Import core libraries
+import os
+import json
+import requests
+import chromadb
+
+# Import libraries for working with PDFs and OpenAI
+from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
+from openai import OpenAI
+from IPython.display import Markdown, display
+
+# Import libraries for processing dataframes and text
+import tiktoken
+import pandas as pd
+
+# Import LangChain components for data loading, chunking, embedding, and vector DBs
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain_chroma import Chroma
+
+from datasets import Dataset
+from langchain_openai import ChatOpenAI
+
+modelToUse="gpt-4o-mini"
+maxTokens=500
+temp=0
+topP=0.95</pre>
+    </div>
+
+    <!-- Cell 4: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Display Markdown formatted string in the notebook output.
+# This function takes a string as input and uses IPython.display.Markdown
+# to render it as Markdown, providing a more visually appealing output.
+def printmd(string):
+    display(Markdown(string))</pre>
+    </div>
+
+    <!-- Cell 5: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Identify the environment to switch the file paths either to use Google Drive or Local
+import sys
+# Check if the operating system is Windows
+if sys.platform.startswith('win'):
+    printmd("Running on Windows")
+    resourcePath=""
+else:
+    # Assume it's a Linux-based environment, likely Google Colab
+    printmd("Running on Linux most likely Colab")
+    # Mount Google Drive for Colab environments to access files
+    from google.colab import drive
+    drive.mount('/content/drive', force_remount=True)
+    # Define the base path for resources in Google Drive
+    resourcePath="/content/drive/MyDrive/ColabAssignments/AppleHBR/"</pre>
+    </div>
+
+    <!-- Cell 6: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Load Configuration for OPEN API
+
+file_name = resourcePath + "config.json"
+with open(file_name, 'r') as file:
+    config = json.load(file)
+    OPENAI_API_KEY = config.get("OPENAI_API_KEY")
+    OPENAI_API_BASE = config.get("OPENAI_API_BASE")
+
+# Store API credentials in environment variables for use by LangChain and OpenAI clients
+os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+os.environ["OPENAI_BASE_URL"] = OPENAI_API_BASE</pre>
+    </div>
+
+    <!-- Cell 7: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Initialize OpenAI client
+openAIClient = OpenAI()</pre>
+    </div>
+
+    <!-- Cell 8: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre>def getDefaultResponse(user_prompt):
+    # Access global variables for model configuration (model, max tokens, temperature, top_p)
+    global modelToUse, maxTokens, temp, topP
+    # Call the OpenAI API to get a chat completion
+    completion = openAIClient.chat.completions.create(
+        model=modelToUse, # Specify the AI model to use for the completion
+        messages=[
+            # Define the user's message to the AI model
+            {"role": "user", "content": user_prompt}
+        ],
+        max_tokens=maxTokens, # Set the maximum number of tokens in the response
+        temperature=temp,     # Control the randomness of the output (lower = more deterministic)
+        top_p=topP            # Control diversity via nucleus sampling (fraction of tokens to consider)
+    )
+    # Extract and return the content of the AI's response
+    return completion.choices[0].message.content</pre>
+    </div>
+
+    <!-- Cell 9: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre>def getGuidedResponse(system_prompt, user_prompt):
+    # Access global variables for model configuration
+    global modelToUse, maxTokens, temp, topP
+    # Call the OpenAI API to get a chat completion with a system prompt for guidance
+    completion = openAIClient.chat.completions.create(
+        model=modelToUse, # Specify the AI model to use for the completion
+        messages=[
+            {"role": "system", "content": system_prompt}, # Define the system's role and guiding prompt
+            {"role": "user", "content": user_prompt}     # Define the user's message to the AI model
+        ],
+        max_tokens=maxTokens, # Set the maximum number of tokens in the response
+        temperature=temp,     # Control the randomness of the output
+        top_p=topP            # Control diversity via nucleus sampling
+    )
+    # Extract and return the content of the AI's response
+    return completion.choices[0].message.content</pre>
+    </div>
+
+    <!-- Cell 10: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Load the PDF from the local location and verify the content
+pdfPath = resourcePath + "HBR_How_Apple_Is_Organized_For_Innovation.pdf"
+pdfLoader = PyMuPDFLoader(pdfPath)
+pdfContent = pdfLoader.load()</pre>
+    </div>
+
+    <!-- Cell 11: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Split the text as multiple chunks
+textSplitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+    encoding_name='cl100k_base',
+    chunk_size=2000, #Complete the code to define the chunk size
+    chunk_overlap= 200 #Complete the code to define the chunk overlap
+)
+pdfChunks = pdfLoader.load_and_split(textSplitter)
+pdfChunksLength = len(pdfChunks)
+printmd(f"The PDF File is split into {pdfChunksLength} Chunks")</pre>
+    </div>
+
+    <!-- Cell 12: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Initialize the Embeddings and verify if it loaded properly and it is of the same size
+embeddingModel = OpenAIEmbeddings(
+    openai_api_key=OPENAI_API_KEY,
+    openai_api_base=OPENAI_API_BASE
+)
+embedding0 = embeddingModel.embed_query(pdfChunks[0].page_content)
+embedding1 = embeddingModel.embed_query(pdfChunks[1].page_content)
+
+isEmbeddingSameSize = len(embedding0) == len(embedding1)
+printmd(f"Dimension of the embedding vector is {len(embedding0)}")
+printmd(f"Both Embeddings are {"SAME" if isEmbeddingSameSize else "DIFFERNT"} size")</pre>
+    </div>
+
+    <!-- Cell 13: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Create the vector database from the chunks
+vectorDBDir="/content/vectordb"
+if not os.path.exists(vectorDBDir):
+    os.makedirs(vectorDBDir)
+    printmd("Vector DB Directory is created")
+vectorDB = Chroma.from_documents(
+    documents=pdfChunks,
+    embedding=embeddingModel,
+    persist_directory=vectorDBDir
+)
+printmd("Vector DB contents is created")</pre>
+    </div>
+
+    <!-- Cell 14: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Load the vector DB
+vectorDBStore = Chroma(
+    embedding_function=embeddingModel,
+    persist_directory=vectorDBDir,
+)
+vectorDBStore.embeddings</pre>
+    </div>
+
+    <!-- Cell 15: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre>vectorDBStore.similarity_search("Who are the authors of this article and who published this article?", k=1)</pre>
+    </div>
+
+    <!-- Cell 16: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Initialize a retriever from the Chroma vector store
+# This retriever will be used to fetch relevant document chunks based on a query.
+vectorDBRetriever = vectorDBStore.as_retriever(
+    search_type="similarity", # Specify that the search type should be 'similarity' to find semantically similar documents
+    search_kwargs={"k": 1}    # Configure the search to return the top 1 most similar document chunk
+)</pre>
+    </div>
+
+    <!-- Cell 17: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre>def getRAGResponse(system_prompt, user_input,k=3):
+    global qaUserMsgTemplate, modelToUse, maxTokens, temp, topP
+    # Retrieve relevant document chunks using the vector database retriever
+    matchingChunks = vectorDBRetriever.invoke(user_input)
+    # Extract the page content from the retrieved document chunks
+    contexts = [d.page_content for d in matchingChunks]
+    # Combine the extracted contexts into a single complete context string
+    completeContext = ". ".join(contexts)
+    # Populate the user message template with the retrieved context and user's question
+    userMessage = qaUserMsgTemplate.replace('{context}', completeContext)
+    userMessage = userMessage.replace('{question}', user_input)
+    # Generate the response using the OpenAI client
+    try:
+        response = openAIClient.chat.completions.create(
+        model=modelToUse,   # Specify the model to be used for completion
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": userMessage}
+        ],
+        max_tokens=maxTokens,
+        temperature=temp,
+        top_p=topP
+        )
+        # Extract and print the generated text from the response
+        response = response.choices[0].message.content.strip()
+    except Exception as e:
+        response = f'Sorry, I encountered the following error: \n {e}'
+
+    return response</pre>
+    </div>
+
+    <!-- Cell 18: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre>def getResponse(system_prompt, user_question):
+    global qaUserMsgTemplate # Ensure global access if not defined in function scope
+
+    printmd(f"## Question: {user_question}")
+    printmd(f"### System Prompt: {system_prompt}")
+
+    printmd("### Default Response:")
+    default_response = getDefaultResponse(user_question)
+    if "JSON" in system_prompt or "XML" in system_prompt:
+        print(default_response)
+    else:
+        printmd(default_response)
+
+    printmd("### Guided Response (Default Prompt):")
+    guided_response_default = getGuidedResponse(system_prompt, user_question)
+    if "JSON" in system_prompt or "XML" in system_prompt:
+        print(guided_response_default)
+    else:
+        printmd(guided_response_default)
+
+    printmd("### RAG Response (Default Prompt):")
+    rag_response_default = getRAGResponse(system_prompt, user_question)
+    if "JSON" in system_prompt or "XML" in system_prompt:
+        print(rag_response_default)
+    else:
+        printmd(rag_response_default)
+
+    printmd("\n---\n") # Separator for clarity</pre>
+    </div>
+
+    <!-- Cell 19: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre>question0 = "Who are the authors of this article and who published this article?"
+question1 = "List down the three leadership characteristics in bulleted points and explain each one of the characteristics under two lines."
+question2 = "Can you explain specific examples from the article where Apple's approach to leadership has led to successful innovations?"
+sysPromptDefault="Your response must be friendly and informative."
+sysPromptJSON="Your response must be friendly and informative. Create response in a JSON Format."
+sysPromptXML="Your response must be friendly and informative. Create response in a XML Format."
+qaUserMsgTemplate="### {context} $$$$"
+
+# Below is the call to the getResponse method with the three different questions and different system prompts.
+# The system prompts contains prompts to format the contents as default, JSON and XML   
+# The output is documented as a well formatted markdown document.
+
+getResponse(sysPromptDefault, question0)
+getResponse(sysPromptDefault, question1)
+getResponse(sysPromptDefault, question2)
+
+getResponse(sysPromptJSON, question0)
+getResponse(sysPromptJSON, question1)
+getResponse(sysPromptJSON, question2)
+
+getResponse(sysPromptXML, question0)
+getResponse(sysPromptXML, question1)
+getResponse(sysPromptXML, question2)</pre>
+    </div>
+
+    <!-- Cell 20: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre>getResponse(sysPromptDefault, "What is an example of the attention to detail?")</pre>
+    </div>
+
+    <!-- Cell 21: code -->
+    <div class="cell code">
+      <div class="meta">Code cell</div>
+      <pre># Generate actionable insights and business recommendations using the RAG pipeline
+insights_prompt = (
+    "Based on the article 'How Apple Is Organized for Innovation', generate 5 concise, actionable insights "
+    "that product and engineering leaders can apply. For each insight provide a one-line action and a one-sentence rationale."
+)
+
+recommendations_prompt = (
+    "Based on the same article, produce 7 concrete business recommendations for senior leadership "
+    "and org design to improve innovation outcomes. For each recommendation provide a short rationale and a suggested first step."
+)
+
+# Get RAG-backed responses
+actionable_insights = getRAGResponse(sysPromptDefault, insights_prompt)
+business_recommendations = getRAGResponse(sysPromptDefault, recommendations_prompt)
+
+# Display in notebook
+printmd("## Actionable Insights")
+printmd(actionable_insights)
+
+printmd("## Business Recommendations")
+printmd(business_recommendations)
+
+# Persist results to a JSON file for reuse
+output = {
+    "actionable_insights": actionable_insights,
+    "business_recommendations": business_recommendations
+}</pre>
+    </div>
+
+    <div style="margin-top:26px;color:#6a737d;font-size:13px">Export generated from notebook JSON present in the workspace. No outputs were executed; this is a static representation.</div>
+  </div>
+</body>
+</html>
