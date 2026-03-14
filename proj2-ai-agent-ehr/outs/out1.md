@@ -1,13 +1,5 @@
-Successfully read datafiles/trusted_sources_catalog.csv with 20 rows.
-Successfully read datafiles/patient_friendly_lab_explanations.csv with 30 rows.
-Successfully read datafiles/medication_education.csv with 30 rows.
-Successfully read datafiles/safety_policy_rules.csv with 10 rows.
-patients        10
-encounters      29
-clinical_notes  43
-labs            141
-medications     56
-allergies       15
+# **LLM Temperature = 0.3"
+
 # **System prompt**
 
 You are an advanced clinical assistant AI specializing in EHR analysis. Your goal is to provide evidence-based, concise insights by analyzing patient records.
@@ -52,7 +44,7 @@ User question: What does my Hemoglobin A1C result mean?
 > -- No Content --
 ### 5. ToolMessage
 #### Content:
-> {"test_name_normalized": "Hemoglobin A1c", "plain_language_summary": "A1c reflects your average blood sugar over about the past 2–3 months.", "why_it_matters": "It helps monitor diabetes and long-term blood sugar control.", "common_reasons_high": "Diabetes or prediabetes; certain conditions can also affect results.", "common_reasons_low": "May be seen with conditions that shorten red blood cell lifespan.", "when_to_contact_clinician": "Contact your clinician if levels are persistently above target or if you have symptoms of high/low blood sugar.", "citation_url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/", "source_id": "S01"}
+> {"test_name_normalized": "Hemoglobin A1c", "plain_language_summary": "A1c reflects your average blood sugar over about the past 2ï¿½3 months.", "why_it_matters": "It helps monitor diabetes and long-term blood sugar control.", "common_reasons_high": "Diabetes or prediabetes; certain conditions can also affect results.", "common_reasons_low": "May be seen with conditions that shorten red blood cell lifespan.", "when_to_contact_clinician": "Contact your clinician if levels are persistently above target or if you have symptoms of high/low blood sugar.", "citation_url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/", "source_id": "S01"}
 ---
 # <font color='#0E4C92'><B>My Patient Id is: P001. What does my Hemoglobin A1C result mean?</B> In 5 steps.</font>
 ## Answer
@@ -62,7 +54,7 @@ Your recent Hemoglobin A1c (HbA1c) results are as follows:
 2. **February 21, 2025**: 3.74% (Low; below normal range)
 
 ### What Hemoglobin A1c Means:
-- **Average Blood Sugar**: The A1c test reflects your average blood sugar levels over the past 2–3 months.
+- **Average Blood Sugar**: The A1c test reflects your average blood sugar levels over the past 2ï¿½3 months.
 - **Monitoring Diabetes**: It is primarily used to monitor diabetes and assess long-term blood sugar control.
 
 ### Interpretation of Your Results:
@@ -94,7 +86,7 @@ User question: What does my Hemoglobin A1C result mean?
 > -- No Content --
 ### 5. ToolMessage
 #### Content:
-> {"test_name_normalized": "Hemoglobin A1c", "plain_language_summary": "A1c reflects your average blood sugar over about the past 2–3 months.", "why_it_matters": "It helps monitor diabetes and long-term blood sugar control.", "common_reasons_high": "Diabetes or prediabetes; certain conditions can also affect results.", "common_reasons_low": "May be seen with conditions that shorten red blood cell lifespan.", "when_to_contact_clinician": "Contact your clinician if levels are persistently above target or if you have symptoms of high/low blood sugar.", "citation_url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/", "source_id": "S01"}
+> {"test_name_normalized": "Hemoglobin A1c", "plain_language_summary": "A1c reflects your average blood sugar over about the past 2ï¿½3 months.", "why_it_matters": "It helps monitor diabetes and long-term blood sugar control.", "common_reasons_high": "Diabetes or prediabetes; certain conditions can also affect results.", "common_reasons_low": "May be seen with conditions that shorten red blood cell lifespan.", "when_to_contact_clinician": "Contact your clinician if levels are persistently above target or if you have symptoms of high/low blood sugar.", "citation_url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/", "source_id": "S01"}
 ### 6. AIMessage
 #### Tool calls:
 > [{'name': 'lookup_trusted_source', 'args': {'source_id': 'S01'}, 'id': 'call_75EFqkIfGTfv8kQBt0qNdlUt', 'type': 'tool_call'}]
@@ -111,7 +103,7 @@ User question: What does my Hemoglobin A1C result mean?
 2. **February 21, 2025**: 3.74% (Low; below normal range)
 
 ### What Hemoglobin A1c Means:
-- **Average Blood Sugar**: The A1c test reflects your average blood sugar levels over the past 2–3 months.
+- **Average Blood Sugar**: The A1c test reflects your average blood sugar levels over the past 2ï¿½3 months.
 - **Monitoring Diabetes**: It is primarily used to monitor diabetes and assess long-term blood sugar control.
 
 ### Interpretation of Your Results:
@@ -406,7 +398,7 @@ User question: Do I have any allergies I should be aware of?
    - **Result:** 3.39% (Low: Normal range is 4.0 - 5.6%)
 
 10. **eGFR** (May 8, 2025)
-    - **Result:** 93.0 mL/min/1.73m² (Normal: 60.0 - 120.0 mL/min/1.73m²)
+    - **Result:** 93.0 mL/min/1.73mï¿½ (Normal: 60.0 - 120.0 mL/min/1.73mï¿½)
 
 ### Summary
 Your recent visits primarily focused on managing GERD, hypertension, and asthma, with appropriate follow-up care instructions provided. Lab results indicate stable kidney function and cholesterol levels, but TSH and Hemoglobin A1c levels require attention due to being outside the normal range. Please consult your healthcare provider for further evaluation and management of these findings.
@@ -634,7 +626,7 @@ User question: What does my Hemoglobin A1C result mean?
 > -- No Content --
 ### 5. ToolMessage
 #### Content:
-> {"test_name_normalized": "Hemoglobin A1c", "plain_language_summary": "A1c reflects your average blood sugar over about the past 2–3 months.", "why_it_matters": "It helps monitor diabetes and long-term blood sugar control.", "common_reasons_high": "Diabetes or prediabetes; certain conditions can also affect results.", "common_reasons_low": "May be seen with conditions that shorten red blood cell lifespan.", "when_to_contact_clinician": "Contact your clinician if levels are persistently above target or if you have symptoms of high/low blood sugar.", "citation_url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/", "source_id": "S01"}
+> {"test_name_normalized": "Hemoglobin A1c", "plain_language_summary": "A1c reflects your average blood sugar over about the past 2ï¿½3 months.", "why_it_matters": "It helps monitor diabetes and long-term blood sugar control.", "common_reasons_high": "Diabetes or prediabetes; certain conditions can also affect results.", "common_reasons_low": "May be seen with conditions that shorten red blood cell lifespan.", "when_to_contact_clinician": "Contact your clinician if levels are persistently above target or if you have symptoms of high/low blood sugar.", "citation_url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/", "source_id": "S01"}
 ---
 # <font color='#0E4C92'><B>My Patient Id is: P001. What does my Hemoglobin A1C result mean?</B> In 5 steps.</font>
 ## Answer
@@ -676,7 +668,7 @@ User question: What does my Hemoglobin A1C result mean?
 > -- No Content --
 ### 5. ToolMessage
 #### Content:
-> {"test_name_normalized": "Hemoglobin A1c", "plain_language_summary": "A1c reflects your average blood sugar over about the past 2–3 months.", "why_it_matters": "It helps monitor diabetes and long-term blood sugar control.", "common_reasons_high": "Diabetes or prediabetes; certain conditions can also affect results.", "common_reasons_low": "May be seen with conditions that shorten red blood cell lifespan.", "when_to_contact_clinician": "Contact your clinician if levels are persistently above target or if you have symptoms of high/low blood sugar.", "citation_url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/", "source_id": "S01"}
+> {"test_name_normalized": "Hemoglobin A1c", "plain_language_summary": "A1c reflects your average blood sugar over about the past 2ï¿½3 months.", "why_it_matters": "It helps monitor diabetes and long-term blood sugar control.", "common_reasons_high": "Diabetes or prediabetes; certain conditions can also affect results.", "common_reasons_low": "May be seen with conditions that shorten red blood cell lifespan.", "when_to_contact_clinician": "Contact your clinician if levels are persistently above target or if you have symptoms of high/low blood sugar.", "citation_url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/", "source_id": "S01"}
 ### 6. AIMessage
 #### Tool calls:
 > [{'name': 'lookup_trusted_source', 'args': {'source_id': 'S01'}, 'id': 'call_M1lvaBIJrraydzNfb6HQbIfB', 'type': 'tool_call'}]
